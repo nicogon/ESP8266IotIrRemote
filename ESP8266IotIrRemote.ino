@@ -26,7 +26,12 @@
 Ticker blinker;
 
 
-// Define NTP properties
+
+
+
+// Defines y configuraciones de la libreria de tiempo
+
+
 #define NTP_OFFSET   60 * 60      // In seconds
 #define NTP_INTERVAL 24 * 60 * 60 * 1000    // In miliseconds, once a day
 #define NTP_ADDRESS  "ca.pool.ntp.org"  // change this to whatever pool is closest (see ntp.org)
@@ -45,52 +50,39 @@ Timezone usEastern(usEDT, usEST);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_ADDRESS, NTP_OFFSET, NTP_INTERVAL);
 
+static time_t local;
 
 
 
-decode_results results;
-
+//Configuraciones de red
+const char* ssid;
+const char* password;
+ESP8266WebServer server(80);
+WiFiClient wifiClient;
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
 IPAddress apIP(192, 168, 1, 1);
 
 
-
-//const char* ssid = "nico4";
-//const char* password = "kokokoko";
-
-
-const char* ssid;
-const char* password;
-
-static time_t local;
-
-ESP8266WebServer server(80);
-
-WiFiClient wifiClient;
-
-
-
-
-
-int contador = 0;
-String  resultado = "";
-//const int led = 13;
-
+//Configuraciones de las librerias IR
+decode_results results;
 #define MIN_UNKNOWN_SIZE 40
-
-File f;
-
 #define CAPTURE_BUFFER_SIZE 1024
 #define TIMEOUT 10U
 IRrecv irrecv(D7, CAPTURE_BUFFER_SIZE, TIMEOUT, true);
+#define IR_LED D8
+IRsend irsend(IR_LED);
 
-//IRrecv irrecv(D7);
 
-#define IR_LED D8  // ESP8266 GPIO pin to use. Recommended: 4 (D2).
 
-IRsend irsend(IR_LED);  // Set the GPIO to be used to sending the message.
+//Varios
+int contador = 0;
+String  resultado = "";
+File f;
+int lastReconnectAttempt = 0;
 
+
+//De aca se pueden sacar cosas para lo de las reglas, funcion que impime la hora serial
 
 void imprimirHora()
 {
@@ -137,21 +129,18 @@ void imprimirHora()
 
   date = ""; t = "";
 
-
 }
 
 
+//Recibe por parametro el nombre de la accion "ej PRENDER" y guarda los codigos infrarrojos que se encuentran en el buffer de recepcion de la libreria de recepcion IR
 
 void guardarRaw(String archivo) {
 
-    // Output RAW timing info of the result.
-    Serial.println(resultToTimingInfo(&results));
-    yield();  // Feed the WDT (again)
-
-    // Output the results as source code
-    Serial.println(resultToSourceCode(&results));
-
-    
+  // Output RAW timing info of the result.
+  Serial.println(resultToTimingInfo(&results));
+  yield();  // Feed the WDT (again)
+  // Output the results as source code
+  Serial.println(resultToSourceCode(&results));
   String output = "";
   File f = SPIFFS.open(archivo + ".code", "w");
   if (!f) {
@@ -174,10 +163,10 @@ void guardarRaw(String archivo) {
   f.close();
 }
 
-//F CLOSE???????? 
 
+//Recibe el codigo a transmitir y lo transmite si lo tiene almacenado en el filesystem ej  leerYTransmitirRaw("PRENDER");
 
-void  leerYTransmitirRaw(String archivo) { 
+void  leerYTransmitirRaw(String archivo) {
   f = SPIFFS.open( archivo + ".code", "r");
   if (!f) {
     Serial.println("no existe el archivo que queres abrir");
@@ -197,20 +186,28 @@ void  leerYTransmitirRaw(String archivo) {
 }
 
 
+//Controladora de la ruta /status
+//SE ENCUENTRA HARCODEADA PARA QUE NO ME OBLIGUE A CONECTAR A UN WIFI
 
 void handleStatus() {
 
-  server.send(200, "text", "{\"wifi\":" + String((leer("ssid") == "") ? "true" : "true") + ",\"ir\":"+String((SPIFFS.open("PRENDER.code", "r")&&SPIFFS.open("APAGAR.code", "r"))? "true" : "false" )+"}");
+  server.send(200, "text", "{\"wifi\":" + String((leer("ssid") == "") ? "true" : "true") + ",\"ir\":" + String((SPIFFS.open("PRENDER.code", "r") && SPIFFS.open("APAGAR.code", "r")) ? "true" : "false" ) + "}");
 
   //false true fase
 
 }
 
+
+
+
+//Esta funcion la dejo comentada, sirve para lo de las reglas, es basicamente una funcion explode a la cual
+// que me da un elemento de un string separado por un caracter  nico = getValue("nico-coco-lala","-",0);
+
 /*
- * 
- * 
-String getValue(String data, char separator, int index)
-{
+  /
+
+  String getValue(String data, char separator, int index)
+  {
   int maxIndex = data.length() - 1;
   int j = 0;
   String chunkVal = "";
@@ -236,7 +233,7 @@ String getValue(String data, char separator, int index)
       return chunkVal;
     }
   }
-}
+  }
 
   Dir dir = SPIFFS.openDir("");
   while (dir.next()) {
@@ -253,38 +250,33 @@ String getValue(String data, char separator, int index)
 
 */
 
+//Controladora de la ruta guardarcodigo
 
 void handleGuardarCodigo() {
 
   if (server.args() == 1) {
-  
+
     while (irrecv.decode(&results)) {
       irrecv.resume();
       yield();
     } //Borro el buffer
-      Serial.println("recibi codigo " + server.arg(0));
-
-
+    
+    Serial.println("recibi codigo " + server.arg(0));
     //int timeout = 0;
     long now = millis();
-    while (!irrecv.decode(&results) && ((millis()-now)<15000)) {
-      //delay(500);
+    while (!irrecv.decode(&results) && ((millis() - now) < 15000)) {
       yield();
-     // timeout++;
     } //Espero codigo
 
 
-    if ((millis()-now)>15000) {
+    if ((millis() - now) > 15000) {
 
       server.send(200, "text/plain", "No se detecto codigo");
       Serial.println("Error timeout IR");
     } else {
       delay(300);
       guardarRaw(server.arg(0));
-
       server.send(200, "text/plain", "ok");
-
-
       Serial.println("codigo guardado");
     }
 
@@ -295,7 +287,7 @@ void handleGuardarCodigo() {
 
 }
 
-
+//Controladora de guardar wifi
 void handleGuardarWifi() {
 
   if (server.args() == 2) {
@@ -316,6 +308,7 @@ void handleGuardarWifi() {
 }
 
 
+//Controladora de emitir codigo
 
 
 void handleEmitirCodigo() {
@@ -328,50 +321,42 @@ void handleEmitirCodigo() {
 
 
     /*
-     * 
-    Para despues: hacer que el toggle guarde el estado
-    
-    if(server.arg(0)=="PRENDER"){guardar("STATUS","ON");}
-    if(server.arg(0)=="APAGAR"){guardar("STATUS","ON");}
+
+      Para despues: hacer que el toggle guarde el estado
+
+      if(server.arg(0)=="PRENDER"){guardar("STATUS","ON");}
+      if(server.arg(0)=="APAGAR"){guardar("STATUS","ON");}
 
     */
 
-    
+
   } else {
-     server.send(200, "text/plain", "no ingresaste codigo");
+    server.send(200, "text/plain", "no ingresaste codigo");
     Serial.println("no ingresaste codigo");
   }
 
 }
 
 
+//Controladora que entrega en json la lista de wifi, nota que el json se encuentra hecho a mano, no uso libreria de json porque no me convenvieron las que encontre
 
 void handleWifiList() {
-
   String response = "{";
-
   int n = WiFi.scanNetworks();
   for (int i = 0; i < n; ++i) {
-
     response += "\"" + String(i) + "\":\"" + WiFi.SSID(i) + "\"";
     if (i != n - 1) response += ",";
-
-    //</td><td>"+WiFi.RSSI(i)+"</td><td>"+((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? "Open" : "Wpa2")+"</td><td><a class='btn btn-sm btn-primary' href='#fork'>Seleccionar</a></td></tr>";
     delay(10);
   }
-
   response += "}";
-
   server.send(200, "text/html", response);
-
-
 }
 
 
 
+//Si no encuentra la ruta muestra esto
 
 void handleNotFound() {
-  // digitalWrite(led, 1);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -384,11 +369,11 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  // digitalWrite(led, 0);
 }
 
 
 
+//Funciones que guardan configuraciones como archivos
 
 void guardar(String archivo, String valor) {
   File f = SPIFFS.open(archivo + ".txt", "w");
@@ -416,9 +401,7 @@ String  leer(String archivo) {
 }
 
 
-
-
-
+//Funcion que llama cuando hay un mensaje MQTT
 
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println("Llego mensaje mqqt");
@@ -429,6 +412,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   leerYTransmitirRaw(mensaje);
 
 }
+//Configuracion del cliente mqtt, ponerlo arriba
 
 PubSubClient client("m12.cloudmqtt.com", 12178, callback, wifiClient);
 
@@ -436,11 +420,13 @@ PubSubClient client("m12.cloudmqtt.com", 12178, callback, wifiClient);
 
 void setup(void) {
 
-  pinMode (D5, INPUT);
-  pinMode (D6, OUTPUT);
+  pinMode (D5, INPUT);  //Pulsador
+  pinMode (D6, OUTPUT); //Led 
+  
   irrecv.setUnknownThreshold(MIN_UNKNOWN_SIZE);
-  irrecv.enableIRIn();  // Start the receiver
+  irrecv.enableIRIn();  
   irsend.begin();
+  
   Serial.begin(115200);
   //Serial.setDebugOutput(true);
 
@@ -464,10 +450,11 @@ void setup(void) {
 
 
   digitalWrite(D6, HIGH);
-  if (digitalRead(D5) == HIGH || leer("ssid") == "") { //Esta tocando boton
-    guardar("ssid", "");
-        SPIFFS.remove("PRENDER.code");
-         SPIFFS.remove("APAGAR.code");
+  
+  if (digitalRead(D5) == HIGH || leer("ssid") == "") { //Esta tocando boton borrar configuraciones
+    guardar("ssid", "");            //Una forma la hice removiendo la otra guardando nada en esa variable, tendria que unificar a un mismo metodo
+    SPIFFS.remove("PRENDER.code");
+    SPIFFS.remove("APAGAR.code");
     digitalWrite(D6, LOW);
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
@@ -489,19 +476,12 @@ void setup(void) {
     }
 
 
-    // update the NTP client and get the UNIX UTC timestamp
-    timeClient.update();
-
-
-    blinker.attach(10, imprimirHora);
-
-
+    timeClient.update();  //Actualizo la hora interna
+    
+    blinker.attach(10, imprimirHora); //Agrego un timer que cada 10 segundos imprima hora, esto solo funciona en modo conectado a un ssid
 
     if (WiFi.status() == WL_CONNECTED) {
-
-
-      // if (client.connected())
-
+      //Por ahora nada
     }
 
   }
@@ -514,6 +494,8 @@ void setup(void) {
     Serial.println("usados "+String(info.usedBytes));
   */
 
+  //Esto sirve para que se auto redirija el trafijo al wifi cuando se conecta al modulo directamente
+  
   dnsServer.start(DNS_PORT, "*", apIP);
   Serial.println("");
   Serial.print("Conectado a");
@@ -521,6 +503,8 @@ void setup(void) {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
+  //Crea el dominio iot.local para poder acceder dentro de una misma red
+  
   if (!MDNS.begin("iot")) {
     Serial.println("Error setting up MDNS responder!");
   } else {
@@ -529,31 +513,23 @@ void setup(void) {
     MDNS.addService("http", "tcp", 80);
   }
 
+
+  //Rutas estaticas
   server.serveStatic("/estilos.css", SPIFFS, "/estilos.css");
   server.serveStatic("/codigo.js", SPIFFS, "/codigo.js");
-
   server.serveStatic("/", SPIFFS, "/index.html");
-
   server.serveStatic("/fontello.woff2", SPIFFS, "/fontello.woff2");
   server.serveStatic("/fontello.woff", SPIFFS, "/fontello.woff");
   server.serveStatic("/fontello.ttf", SPIFFS, "/fontello.ttf");
   server.serveStatic("/imagen.png", SPIFFS, "/imagen.png");
 
-
-
+  //Rutas dinamicas
   server.on("/wifilist", handleWifiList);
-
-
-
   server.on("/status", handleStatus);
-
   server.on("/guardarwifi", handleGuardarWifi);
-
   server.on("/emitir", handleEmitirCodigo);
-
   server.on("/guardarcodigo", handleGuardarCodigo);
-
-
+  
   server.onNotFound(handleNotFound);
 
   server.begin();
@@ -561,16 +537,16 @@ void setup(void) {
 
 
 }
-int lastReconnectAttempt = 0;
+
 void loop(void) {
 
   dnsServer.processNextRequest();
   server.handleClient();
 
+  //Si no esta conectado, cada 10 segundos intenta conectar al servidor mqtt
   if (!client.connected()) {
-
     long now = millis();
-    if (now - lastReconnectAttempt > 5000) {
+    if (now - lastReconnectAttempt > 10000) {
       lastReconnectAttempt = now;
       // Attempt to reconnect
       if (reconnect()) {
@@ -585,8 +561,6 @@ void loop(void) {
 
 
 }
-
-
 
 
 boolean reconnect() {
