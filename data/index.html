@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+      <meta name="description" content="">
+      <meta name="author" content="">
+      <title>Receptor IR</title>
+      <!-- Bootstrap core CSS -->
+      <link href="estilos.css" rel="stylesheet">
+      <!-- Custom styles for this template -->
+    
+   </head>
+   <body>
+      <nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse fixed-top">
+         <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+         </button>
+         <a class="navbar-brand" href="#">Controladora Infraroja</a>
+         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+               <li class="nav-item active">
+                  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link" href="#">Reglas</a>
+               </li>
+               <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle"  id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Configuracion</a>
+                  <div class="dropdown-menu" aria-labelledby="dropdown01">
+                     <a class="dropdown-item" href="#">Wifi</a>
+                     <a class="dropdown-item" href="#">Programacion de codigos</a>
+                  </div>
+               </li>
+            </ul>
+         </div>
+      </nav>
+      <div class="container">
+
+         <div class="jumbotron" style="display:none" id="page_reglas">
+            <h1>Reglas</h1>
+            <hr>
+            <table class="table table-responsive" >
+               <thead class="thead-dark">
+                  <tr>
+                     <th scope="col">Accion</th>
+                     <th scope="col">Hora</th>
+                     <th scope="col">L</th>
+                     <th scope="col">M</th>
+                     <th scope="col">M</th>
+                     <th scope="col">J</th>
+                     <th scope="col">V</th>
+                     <th scope="col">S</th>
+                     <th scope="col">D</th>
+                     <th scope="col"></th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr class="table-success">
+                     <td>Prender</td>
+                     <td>12:40</td>
+                     <td>✔</td>
+                     <td>✖</td>
+                     <td>✖</td>
+                     <td>✖</td>
+                     <td>✖</td>
+                     <td>✖</td>
+                     <td>✖</td>
+                     <td><button class="btn btn-outline-danger btn-sm"><span class="icon-trash"></span></button></td>
+                  </tr>
+               </tbody>
+            </table>
+            <br><br>
+            <h3 >Nueva regla</h3>
+            <hr>
+            <div class="form-group row">
+               <label for="staticEmail" class="col-sm-2 col-form-label">Accion</label>
+               <div class="col-sm-10">
+                  <select class="form-control" id="exampleSelect1">
+                     <option>Prender</option>
+                     <option>Apagar</option>
+                  </select>
+               </div>
+            </div>
+            <div class="form-group row">
+               <label for="staticEmail" class="col-sm-2 col-form-label">Hora</label>
+               <div class="col-sm-10">
+                  <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="inlineFormCustomSelect">
+                     <option selected>1</option>
+                     <option value="1">2</option>
+                     <option value="2">3</option>
+                     <option value="3">3</option>
+                  </select>
+                  <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="inlineFormCustomSelect">
+                     <option selected>Choose...</option>
+                     <option value="1">One</option>
+                     <option value="2">Two</option>
+                     <option value="3">Three</option>
+                  </select>
+               </div>
+            </div>
+            <div class="form-group row">
+               <label for="inputPassword" class="col-sm-2 col-form-label">Dia</label>
+               <div class="col-sm-10">
+                  <div class="form-check form-check-inline disabled">
+                     <label class="form-check-label">
+                     <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled> 3
+                     </label>
+                  </div>
+                  <div class="form-check form-check-inline disabled">
+                     <label class="form-check-label">
+                     <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled> 3
+                     </label>
+                  </div>
+                  <div class="form-check form-check-inline disabled">
+                     <label class="form-check-label">
+                     <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled> 3
+                     </label>
+                  </div>
+                  <div class="form-check form-check-inline disabled">
+                     <label class="form-check-label">
+                     <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled> 3
+                     </label>
+                  </div>
+                  <div class="form-check form-check-inline disabled">
+                     <label class="form-check-label">
+                     <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled> 3
+                     </label>
+                  </div>
+                  <div class="form-check form-check-inline disabled">
+                     <label class="form-check-label">
+                     <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled> 3
+                     </label>
+                  </div>
+                  <div class="form-check form-check-inline disabled">
+                     <label class="form-check-label">
+                     <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled> 3
+                     </label>
+                  </div>
+                  <div class="form-check form-check-inline disabled">
+                     <label class="form-check-label">
+                     <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled> 3
+                     </label>
+                  </div>
+               </div>
+            </div>
+            <div class="form-group row">
+               <label for="staticEmail" class="col-sm-2 col-form-label"></label>
+               <div class="col-sm-10">
+                  <button class="btn btn-primary">Agregar</button>
+               </div>
+            </div>
+         </div>
+
+
+
+
+
+
+         
+         <div class="jumbotron" style="display:none" id="page_wifi1">
+            <h1 >Configuracion wifi</h1>
+            <hr>
+            <p class="lead">Seleccione un wifi para conectar el modulo infrarrojo</p>
+            <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>
+            <div class="btn-group-vertical  btn-block" id="wifiList">
+               
+          
+            </div>
+            <br><br>
+            <p><a id="btn-wifi1-next" class="btn btn-lg btn-success btn-block" href="#" role="button">Seleccionar</a></p>
+         </div>
+             
+
+
+
+
+         <div class="jumbotron" style="display:none" id="page_wifi2">
+            <h1 >Configuracion wifi</h1>
+            <hr>
+            <p class="lead">Ingrese la contraseña</p>
+            <div class="input-group">
+               <span class="input-group-addon" id="basic-addon1"><span class="icon-wifi"></span></span>
+               <input type="text" class="form-control form-control-lg " id="ssid" readonly>
+            </div>
+            <br>
+            <div class="input-group">
+               <span class="input-group-addon" id="basic-addon1"><span class="icon-key"></span></span>
+               <input type="text" class="form-control form-control-lg " id="ssidpassword"  placeholder="Escriba la contraseña aqui" >
+            </div>
+            <br><br>
+            <p><a id="btn-wifi2-next" class="btn btn-lg btn-success btn-block" href="#" role="button">Conectar</a></p>
+         </div>
+
+
+
+
+         <div class="jumbotron" style="display:none" id="page_wifi3">
+            <h1 >Configuracion wifi</h1>
+            <hr>
+            <p class="lead">Este ssid sera apagado, por favor conectese a la red wifi</p>
+         </div>
+
+
+
+
+
+
+
+
+
+
+
+         <div class="jumbotron" style="display:none" id="page_home" >
+            <center>
+               <br><br>
+               <p style="color:#aaa" >Accione el controlador</p>
+               <label class="switch">
+               <input id="switch" type="checkbox">
+               <span class="slider round"></span>
+               </label>
+               <br><br>
+            </center>
+         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+         <div class="jumbotron" style="display:none" id="page_program1">
+            <h1>Programacion de codigos</h1>
+            <hr>
+            <h4 >Accion <span  class=" idCodigo badge badge-primary">PRENDER</span></h4>
+            <p class="lead">Apunte el control remoto hacia el sensor del modulo y presione el boton de  <span class="idCodigo"></span></p>
+            <center>
+               <img class="img-fluid" src="imagen.png">
+            </center>
+            <div class="progress">
+               <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+         </div>
+
+
+
+
+
+         <div class="jumbotron" style="display:none" id="page_program2">
+            <h1>Programacion de codigos</h1>
+            <hr>
+            <h4 >Accion <span class="idCodigo badge badge-primary">PRENDER</span></h4>
+            <p class="lead">Verifique el funcionamiento del codigo recien grabado</p>
+            <br>
+            <center>
+               <p><a id="enviarIR" class="btn btn-lg btn-primary btn-xlg" href="#" role="button"><span class="icon-mixcloud"></span> Prueba transmicion</a></p>
+            </center>
+            <br>
+            <div class="row">
+               <div class="col-2" >
+                  <p><a  id="btn-prevprogram" class="btn btn-lg btn-secondary btn-block" href="#" role="button"><span class="icon-left-open-big"></span> </a></p>
+               </div>
+               <div class="col-10">
+                  <p><a id="btn-nextprogram" class="btn btn-lg btn-success btn-block" href="#" role="button">Siguiente <span class="icon-right-open-big"></span></a></p>
+               </div>
+            </div>
+         </div>
+
+
+
+
+         <footer class="footer">
+            <p>&copy; Tp sistemas embebidos 2017</p>
+         </footer>
+      </div>
+      <!-- /container -->
+      <!-- Bootstrap core JavaScript
+         ================================================== -->
+      <!-- Placed at the end of the document so the pages load faster -->
+      <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+      <script src="codigo.js"></script>
+
+
+
+
+   </body>
+</html>
